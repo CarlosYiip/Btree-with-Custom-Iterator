@@ -8,11 +8,10 @@
 #include <iterator>
 #include <cassert>
 
-template <typename T> class Btree;
+template <typename T> class const_btree_iterator {
+};
 
-
-template <typename T, typename P> class Btree_iterator {
-public:
+template <typename T> class btree_iterator {
 };
 
 

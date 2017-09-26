@@ -13,7 +13,7 @@
 template <typename T>
 class Btree {
 public:
-    Btree(size_t maxNodeElems = 40) : elementsPerNode{maxNodeElems} {};
+    Btree(size_t maxNodeElems = 40);
     Btree(const Btree<T>&);
     Btree(Btree<T>&&);
 
@@ -22,8 +22,8 @@ public:
 
 //    friend std::ostream& operator<<<>(std::ostream&, const Btree<T>&);
 
-    typedef Btree_iterator<T, T*> iterator;
-    typedef Btree_iterator<T, const T*> const_iterator;
+    typedef btree_iterator<T> iterator;
+    typedef const_btree_iterator<T> const_iterator;
     iterator find(const T&);
     const_iterator find(const T&) const;
     std::pair<iterator, bool> insert(const T&);
@@ -42,6 +42,10 @@ private:
     size_t elementsPerNode;
 
 };
+
+
+template <typename T>
+Btree<T>::Btree(size_t maxNodeElems) : elementsPerNode{maxNodeElems} {}
 
 
 #endif //A4_Btree_H

@@ -2,33 +2,33 @@
 // Created by carlos Ye on 25/9/17.
 //
 
-#ifndef A4_BTREE_H
-#define A4_BTREE_H
+#ifndef A4_Btree_H
+#define A4_Btree_H
 
 #include <iostream>
-#include "btree_iterator.h"
 #include <vector>
 #include <memory>
+#include "btree_iterator.h"
 
 template <typename T>
-class btree {
+class Btree {
 public:
-    btree(size_t maxNodeElems = 40);
-    btree(const btree<T>&);
-    btree(btree<T>&&);
+    Btree(size_t maxNodeElems = 40) : elementsPerNode{maxNodeElems} {};
+    Btree(const Btree<T>&);
+    Btree(Btree<T>&&);
 
-    btree<T>& operator=(const btree<T>&);
-    btree<T>& operator=(btree<T>&&);
+    Btree<T>& operator=(const Btree<T>&);
+    Btree<T>& operator=(Btree<T>&&);
 
-//    friend std::ostream& operator<<<>(std::ostream&, const btree<T>&);
+//    friend std::ostream& operator<<<>(std::ostream&, const Btree<T>&);
 
-    typedef typename std::vector<T>::iterator iterator;
-    typedef typename std::vector<T>::const_iterator const_iterator;
+    typedef Btree_iterator<T, T*> iterator;
+    typedef Btree_iterator<T, const T*> const_iterator;
     iterator find(const T&);
     const_iterator find(const T&) const;
     std::pair<iterator, bool> insert(const T&);
 
-    ~btree();
+    ~Btree() = default;
 
 private:
 
@@ -39,8 +39,9 @@ private:
 
 
     std::vector<Node> nodes;
+    size_t elementsPerNode;
 
 };
 
 
-#endif //A4_BTREE_H
+#endif //A4_Btree_H

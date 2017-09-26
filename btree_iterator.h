@@ -5,9 +5,14 @@
 #ifndef A4_BTREE_ITERATOR_H
 #define A4_BTREE_ITERATOR_H
 
+#include <iterator>
+#include <cassert>
 
-class btree_iterator {
+template <typename T> class Btree;
 
+
+template <typename T, typename P> class Btree_iterator {
+public:
 };
 
 

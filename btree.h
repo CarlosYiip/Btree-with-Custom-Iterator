@@ -2,103 +2,215 @@
 // Created by carlos Ye on 25/9/17.
 //
 
-#ifndef A4_Btree_H
-#define A4_Btree_H
+#ifndef A4_btree_H
+#define A4_btree_H
 
 #include <iostream>
+#include <cstddef>
 #include <vector>
 #include <memory>
 #include <algorithm>
 #include "btree_iterator.h"
 
 template <typename T>
-class Btree {
+class btree {
 public:
-    Btree(size_t maxNodeElems = 40) { root.elementsPerNode = maxNodeElems; };
-    Btree(const Btree<T>&);
-    Btree(Btree<T>&&);
+    btree(size_t maxNodeElems = 40) : root{std::make_shared<Node>(Node {maxNodeElems})} {};
+    btree(const btree<T>&);
+    btree(btree<T>&&);
+    btree<T>& operator=(const btree<T>&);
+    btree<T>& operator=(btree<T>&&);
 
-    Btree<T>& operator=(const Btree<T>&);
-    Btree<T>& operator=(Btree<T>&&);
-
-   // friend std::ostream& operator<<<>(std::ostream&, const Btree<T>&);
     friend class btree_iterator<T>;
-    // friend class const_iterator<T>
     typedef btree_iterator<T> iterator;
-    // typedef const_iterator<T> const_iterator;
-    // iterator find(const T&);
-    // const_iterator find(const T&) const;
+    typedef btree_iterator<const T> const_iterator;
+
+    iterator find(const T&);
+
+    const_iterator find(const T&) const;
+
     std::pair<iterator, bool> insert(const T&);
 
-    ~Btree() = default;
+    iterator begin() { return iterator{head}; }
+
+    const_iterator cbegin() { return const_iterator{head}; }
+
+    iterator end() { return iterator{nullptr}; }
+
+    const_iterator cend() { return const_iterator{nullptr}; }
+
+    ~btree() = default;
 
 private:
-    struct Node {
-        size_t elementsPerNode;
-        std::vector<T> client_elems;
-        std::shared_ptr<T> parent_node;
-        std::vector<std::shared_ptr<Node>> child_nodes;
-        bool isFull() { return client_elems.size() == elementsPerNode; }
-        bool isRoot() { return parent_node == nullptr; }
-        bool operator<(Node& other) { return client_elems.front() < other.client_elems.front(); }
+    class Node {
+    private:
+        struct Element;
+    public:
+        friend class btree_iterator<T>;
+        friend class btree<T>;
+
+        Node(size_t maxNodeElems) : maxNodeElems_{maxNodeElems} {};
+        Node(const Node&) = default;
+        Node(Node&&) = default;
+        Node& operator=(const Node&) = default;
+        Node& operator=(Node&&) = default;
+        ~Node() {};
+
+        typename std::vector<Element>::iterator find(const T&);
+        typename std::vector<Element>::const_iterator find(const T&) const ;
+        typename std::vector<Element>::iterator insert(const T&);
+
+        bool isFull() const ;
+        bool hasChild() const ;
+        bool isInNode(const T&) const ;
+
+        void initializeChild();
+
+    private:
+        struct Element {
+            T elem;
+            std::shared_ptr<Element> prev;
+            std::shared_ptr<Element> next;
+
+            bool hasPrev() { return prev != nullptr; }
+            bool hasNext() { return next != nullptr; }
+
+            friend bool operator==(const Element& lhs, const Element& rhs) {
+                return lhs.elem == rhs.elem;
+            }
+
+            friend bool operator<(const Element& lhs, const Element& rhs) {
+                return lhs.elem < rhs.elem;
+            }
+        };
+
+        size_t maxNodeElems_;
+        std::vector<Element> elems;
+        std::vector<std::shared_ptr<Node>> childs;
     };
-    Node root;
+
+    std::shared_ptr<typename Node::Element> head;
+    std::shared_ptr<typename Node::Element> tail;
+    std::shared_ptr<Node> root;
 };
+/******************************************************************* Tree ****************************************************************/
+template <typename T>
+typename btree<T>::iterator btree<T>::find(const T&) {
 
-
-
-
+}
 
 template <typename T>
-std::pair<btree_iterator<T>, bool> Btree<T>::insert(const T& val) {
-    Node &node = root;
-    std::pair<btree_iterator<T>, bool> res;
+typename btree<T>::const_iterator btree<T>::find(const T&) const {
+    
+}
+
+template <typename T>
+std::pair<typename btree<T>::iterator, bool> btree<T>::insert(const T &val) {
+    typedef typename btree<T>::Node::Element Element;
+
+    std::pair<iterator, bool> res_pair;
+    std::shared_ptr<Node> node = root;
+    typename std::vector<Element>::iterator it;
+
 
     while (true) {
-        if (!node.isFull()) {
-            auto it = std::upper_bound(node.client_elems.begin(), node.client_elems.end(), val);
-            if (it != node.client_elems.end() && *it == val) {
-                // std::cout << "gotcha!\n";
-                btree_iterator<T> it_;
-                res.first = it_;
-                res.second = false;
-                return res;
+        if (!node->isFull()) {
+            if (node->isInNode(val)) {
+                it = node->find(val);
+                res_pair.second = false;
+            } else {
+                it = node->insert(val);
+                res_pair.second = true;
+
+                if (head == nullptr || val < head->elem) 
+                    head = std::make_shared<Element>(*it);
+                
+                if (tail == nullptr || tail->elem < val)
+                    tail = std::make_shared<Element>(*it);
             }
-            node.client_elems.insert(it, val);
-            break;
+        }
+        break;
+    }
+
+    res_pair.first = std::make_shared<Element>(*it);
+    return res_pair;
+}
+
+/******************************************************************* Node ****************************************************************/
+template <typename T>
+typename std::vector<typename btree<T>::Node::Element>::iterator btree<T>::Node::find(const T &val) {
+    auto it = std::lower_bound(elems.begin(), elems.end(), Element {val});
+    return it;
+}
+
+template <typename T>
+typename std::vector<typename btree<T>::Node::Element>::const_iterator btree<T>::Node::find(const T &val) const {
+    auto it = std::lower_bound(elems.cbegin(), elems.cend(), Element {val});
+    return it;
+}
+
+template <typename T>
+typename std::vector<typename btree<T>::Node::Element>::iterator btree<T>::Node::insert(const T &val) {
+    typedef typename btree<T>::Node::Element Element;
+    typename std::vector<Element>::iterator it;
+    Element newElem {val};
+
+
+    if (elems.size() == 0) {
+        elems.push_back(newElem);
+        it = --elems.end();
+    } else {
+        if (newElem < elems.front()) {
+            elems.insert(elems.begin(), newElem);
+            it == elems.begin();
+        } else if (elems.back() < newElem) {
+            elems.push_back(newElem);
+            it = --elems.end();
         } else {
-            if (node.child_nodes.size() == 0) {
-                for (size_t i = 0; i < node.elementsPerNode; ++i) {
-                    Node newNode;
-                    newNode.elementsPerNode = node.elementsPerNode;
-                    std::shared_ptr<Node> sp = std::make_shared<Node>(newNode);
-                    node.child_nodes.push_back(sp);
-                }
-            }
 
-            auto it = std::upper_bound(node.client_elems.begin(), node.client_elems.end(), val);
-            int dis = std::distance(node.client_elems.begin(), it);
-
-            std::cout << dis << '\n';
-
-            break;
-            
         }
     }
 
 
-
-
-
-
-
-    return res;
+    it = std::lower_bound(elems.begin(), elems.end(), Element {val});
+    return it;
 }
 
+template <typename T>
+bool btree<T>::Node::isFull() const {
+    return elems.size() >= maxNodeElems_;
+};
+
+template <typename T>
+bool btree<T>::Node::hasChild() const {
+    return false;
+};
+
+
+template <typename T>
+bool btree<T>::Node::isInNode(const T &val) const {
+    return std::binary_search(elems.begin(), elems.end(), Element {val});
+}
+
+template <typename T>
+void initializeChild() {
+
+} 
 
 
 
-#endif //A4_Btree_H
+
+
+
+
+
+
+
+
+
+
+
+#endif //A4_btree_H
 
 
 

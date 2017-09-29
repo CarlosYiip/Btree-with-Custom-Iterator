@@ -1,29 +1,26 @@
 #include <iostream>
 #include "btree.h"
-#include <list>
-
+#include "btree_iterator.h"
+#include <algorithm>
 int main() {
 
-    btree<int> btree1{4};
-//    for (int i = 0; i < 1000000; ++i) {
-//        btree1.insert(i / 2);
-//    }
-    std::pair<btree<int>::iterator, bool> p;
-    p = btree1.insert(2);
-    p = btree1.insert(4);
-    p = btree1.insert(6);
-    p = btree1.insert(8);
-    p = btree1.insert(1);
-//    p = btree1.insert(3);
-//    p = btree1.insert(5);
-//    p = btree1.insert(7);
-//    p = btree1.insert(9);
+	btree<int> btree1 {4};
+	btree1.insert(2);
+	btree1.insert(4);
+	btree1.insert(6);
+	btree1.insert(8);
 
+	auto it = btree1.begin();
+	std::cout << *std::nullptr_t << '\n';
+	
 
-    std::cout << p.first->getElement();
-//    std::cout << typeid(p.first).name() << '\n';
+	// std::vector<int> v {1,2,3,4};
 
-//    std::cout << btree1 << '\n';
+	// v.insert(v.begin(), 0);
+
+	// std::cout << *v.end() << '\n';
+
+	
 
     return 0;
 }

@@ -16,8 +16,8 @@ template <typename T> class btree_rconst_iterator;
 template <typename T>
 class btree_iterator {
 public:
-	typedef std::ptrdiff_t difference_type;
-	typedef std::bidirectional_iterator_tag btree_iterator_category;
+	typedef int difference_type;
+	typedef std::bidirectional_iterator_tag iterator_category;
 	typedef T value_type;
 	typedef T* pointer;
 	typedef T& reference;
@@ -60,8 +60,8 @@ btree_iterator<T>& btree_iterator<T>::operator--() {
 template <typename T>
 class btree_riterator {
 public:
-	typedef std::ptrdiff_t difference_type;
-	typedef std::bidirectional_iterator_tag btree_iterator_category;
+	typedef int difference_type;
+	typedef std::bidirectional_iterator_tag iterator_category;
 	typedef T value_type;
 	typedef T* pointer;
 	typedef T& reference;
@@ -104,8 +104,8 @@ btree_riterator<T>& btree_riterator<T>::operator--() {
 template <typename T>
 class btree_const_iterator {
 public:
-	typedef std::ptrdiff_t difference_type;
-	typedef std::bidirectional_iterator_tag btree_iterator_category;
+	typedef int difference_type;
+	typedef std::bidirectional_iterator_tag iterator_category;
 	typedef const T value_type;
 	typedef const T * pointer;
 	typedef const T & reference;
@@ -148,8 +148,8 @@ btree_const_iterator<T>& btree_const_iterator<T>::operator--() {
 template <typename T>
 class btree_const_riterator {
 public:
-	typedef std::ptrdiff_t difference_type;
-	typedef std::bidirectional_iterator_tag btree_iterator_category;
+	typedef int difference_type;
+	typedef std::bidirectional_iterator_tag iterator_category;
 	typedef const T value_type;
 	typedef const T * pointer;
 	typedef const T & reference;

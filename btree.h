@@ -9,6 +9,8 @@
 #include <cstddef>
 #include <vector>
 #include <list>
+#include <deque>
+#include <unordered_set>
 #include <memory>
 #include <algorithm>
 #include "btree_iterator.h"
@@ -28,6 +30,10 @@ public:
         return os;
 
     };
+
+    friend bool operator==(const btree<T>& lhs, const btree<T>& rhs) {
+        return (lhs.head->elem == rhs.head->elem) && (lhs.tail->elem == rhs.tail->elem);
+    }
 
     friend class btree_iterator<T>;
     friend class btree_const_iterator<T>;
@@ -79,11 +85,19 @@ private:
         friend class btree<T>;
 
         Node(size_t maxNodeElems) : maxNodeElems_{maxNodeElems} {};
-        Node(const Node&) = default;
+        Node(const Node&);
         Node(Node&&) = default;
         Node& operator=(const Node&) = default;
         Node& operator=(Node&&) = default;
-        ~Node() = default;
+        ~Node() {
+            for (auto &p : childs)
+                delete p;
+        };
+
+        friend class btree_iterator<T>;
+        friend class btree_const_iterator<T>;
+        friend class btree_riterator<T>;
+        friend class btree_rconst_iterator<T>;
 
         typedef typename Node::Element Element;
 
@@ -128,11 +142,14 @@ private:
         size_t maxNodeElems_;
         std::list<Element> elems;
         std::vector<Node*> childs;
+
+        std::unordered_set<T> set;
     };
 
     typename Node::Element *head;
     typename Node::Element *tail;
     Node* root;
+
 };
 /******************************************************************* Tree ****************************************************************/
 template <typename T>
@@ -145,8 +162,18 @@ template <typename T>
 btree<T>::btree(const btree<T> &other) : root{new Node {other.root->maxNodeElems_}} {
     head = nullptr;
     tail = nullptr;
-    for (auto it = other.cbegin(); it != other.cend(); ++it)
-        insert(*it);
+
+    std::deque<Node*> dq {other.root};
+    while (dq.size() != 0) {
+        Node *next = dq.front();
+        dq.pop_front();
+
+        for (auto &e : next->elems)
+            insert(e.elem);
+
+        for (auto &c : next->childs)
+            dq.push_back(c);
+    }
 }
 
 template <typename T>
@@ -330,7 +357,7 @@ typename std::list<typename btree<T>::Node::Element>::iterator btree<T>::Node::i
             it = std::prev(tmp_it);
         }
     }
-
+    set.insert(newElem.elem);
     return it;
 }
 
@@ -346,13 +373,14 @@ bool btree<T>::Node::hasChild() const {
 
 template <typename T>
 bool btree<T>::Node::isInNode(const typename btree<T>::Node::Element &newElem) const {
+    return set.find(newElem.elem) != set.end();
     auto it = std::find(elems.cbegin(), elems.cend(), newElem);
     return it != elems.cend();
 }
 
 template <typename T>
 void btree<T>::Node::initializeChild() {
-    for (int i = 0; i < maxNodeElems_ + 1; ++i)
+    for (size_t i = 0; i < maxNodeElems_ + 1; ++i)
         childs.push_back(new Node {maxNodeElems_});
 }
 

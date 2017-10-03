@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "btree.h"
+#include <map>
 
 using std::copy;
 using std::cout;
@@ -115,8 +116,6 @@ bool confirmEverythingMatches(const btree<long>& testContainer, const set<long>&
  **/
 using namespace std;
 int main(void) {
-  /*
-  std::time_t start = std::time(NULL);
   // initialise random number generator with 'random' seed
   initRandom();
 
@@ -124,23 +123,11 @@ int main(void) {
   btree<long> testContainer(99);
   set<long> stableContainer;
     
-  insertRandomNumbers(testContainer, stableContainer, 1000000);
+  insertRandomNumbers(testContainer, stableContainer, 5000000);
   btree<long> btcpy = testContainer;
-  confirmEverythingMatches(testContainer, stableContainer);
+  confirmEverythingMatches(btcpy, stableContainer);
 
-  std::cout << "Time: " << std::difftime(std::time(NULL), start) << "s\n";
-  
   return 0;
-  */
-
-
-
-
-
-
-
-
-  
   // this next portion was something I used to sort a bunch of chars
   // this was what I used to debug my iterator and made it work
  	btree<char> astring;
@@ -161,7 +148,7 @@ int main(void) {
 
   std::copy(astring.begin(), astring.end(), std::ostream_iterator<char>(std::cout, " "));
 
-  /*
+
   // const iterator test
   const btree<char>& refstring = astring;
     btree<char>::const_iterator iter;
@@ -202,6 +189,7 @@ int main(void) {
   btree<string>::reverse_iterator riter = strTable->rbegin();
   btree<string>::const_iterator citer = strTable->begin();
 
+    std::cout << *citer << '\n';
   if (*citer != *riter) {
     cout << "success!" << endl;
   }
@@ -209,13 +197,8 @@ int main(void) {
 
   // try to create a copy
   btree<string> btcpy2;
-  
   btcpy2 = *strTable;
   
-  std::cout << (btcpy2 == *strTable) << '\n';
-  */
-
-  
-  return 0;	
+  return 0;
 }
 

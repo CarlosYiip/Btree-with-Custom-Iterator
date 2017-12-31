@@ -18,6 +18,8 @@
 #include <set>
 #include <string>
 #include <utility>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #include "btree.h"
 #include <map>
@@ -74,6 +76,7 @@ void insertRandomNumbers(btree<long>& testContainer, set<long>& stableContainer,
     long rndNum = getRandom(kMinInteger, kMaxInteger);
     std::pair<btree<long>::iterator, bool> result = testContainer.insert(rndNum);
     if (result.second) stableContainer.insert(rndNum);
+    stableContainer.insert(rndNum);
     if ((i + 1) % (size / 10) == 0) 
       cout << "Inserted some " << (i + 1) << " numbers thus far." << endl;
   }
@@ -110,95 +113,136 @@ bool confirmEverythingMatches(const btree<long>& testContainer, const set<long>&
 }  // namespace close
 
 
+int parseLine(char* line){
+  // This assumes that a digit will be found and the line ends in " Kb".
+  int i = strlen(line);
+  const char* p = line;
+  while (*p <'0' || *p > '9') p++;
+  line[i-3] = '\0';
+  i = atoi(p);
+  return i;
+}
+
+int getValue(){ //Note: this value is in KB!
+  FILE* file = fopen("/proc/self/status", "r");
+  int result = -1;
+  char line[128];
+
+  while (fgets(line, 128, file) != NULL){
+    if (strncmp(line, "VmSize:", 7) == 0){
+      result = parseLine(line);
+      break;
+    }
+  }
+  fclose(file);
+  return result;
+}
+
 /**
  * Codes for testing various bits and pieces. Most of the code is commented out
  * you should uncomment it as appropriate.
  **/
 using namespace std;
 int main(void) {
+
+
+
   // initialise random number generator with 'random' seed
   initRandom();
 
   // insert lots of random numbers and compare with a known correct container
-  btree<long> testContainer(99);
+  btree<long> testContainer(1);
   set<long> stableContainer;
     
-  insertRandomNumbers(testContainer, stableContainer, 5000000);
+  insertRandomNumbers(testContainer, stableContainer, 1000000);
   btree<long> btcpy = testContainer;
   confirmEverythingMatches(btcpy, stableContainer);
 
   return 0;
-  // this next portion was something I used to sort a bunch of chars
-  // this was what I used to debug my iterator and made it work
- 	btree<char> astring;
-	
-	cout << "\nInserting these random chars into the tree...\n";
-	for(int i = 0; i < 10; i++) {
-    pair<btree<char>::iterator, bool> result = astring.insert(static_cast<char>(getRandom('A', 'z')));
-    cout << *result.first;
-	}
-	cout << endl << endl;
-
-  
-	
-  for(btree<char>::iterator iter = astring.begin(); iter != astring.end(); ++iter)
-    cout << *iter;
-	cout << endl;
-
-
-  std::copy(astring.begin(), astring.end(), std::ostream_iterator<char>(std::cout, " "));
-
-
-  // const iterator test
-  const btree<char>& refstring = astring;
-    btree<char>::const_iterator iter;
-	cout << "Voila!  Sorted!" << endl;
-
-
-	for(iter = refstring.begin(); iter != refstring.end(); ++iter) {
-		astring.insert(static_cast<char>(getRandom('A', 'z')));
-	
-		cout << *(iter) << " ";
-	}
-	
-	for(btree<char>::const_iterator iter = refstring.begin(); !(iter == refstring.end()); ++iter)
-		cout << *iter;
-	cout << endl;
-  
-  
-  // a full-scale string test of the tree using iterators
-  btree<string> *strTable = new btree<string>(40);
-		
-  ifstream wordFile("twl.txt");
-  if (!wordFile)
-    return 1;  // file couldn't be opened for some reason, abort... 
-  
-  while (wordFile.good()) {
-    string word;
-    getline(wordFile, word);
-    strTable->insert(word);
-  }
-  wordFile.close();
-
-  cout << "twl.txt sorted by our wonderful tree..." << endl;
-  // Such beautiful code with iterators...
-  for(btree<string>::const_iterator iter = strTable->begin(); iter != strTable->end(); ++iter)
-    cout << *iter << endl;
-  
-  // reverse iterator
-  btree<string>::reverse_iterator riter = strTable->rbegin();
-  btree<string>::const_iterator citer = strTable->begin();
-
-    std::cout << *citer << '\n';
-  if (*citer != *riter) {
-    cout << "success!" << endl;
-  }
-
-
-  // try to create a copy
-  btree<string> btcpy2;
-  btcpy2 = *strTable;
-  
-  return 0;
+//  insertRandomNumbers(testContainer, stableContainer, 1000);
+//  btree<long> btcpy = testContainer;
+//  confirmEverythingMatches(btcpy, stableContainer);
+//
+//
+////=======
+//  insertRandomNumbers(testContainer, stableContainer, 5000000);
+//  btree<long> btcpy = testContainer;
+//  confirmEverythingMatches(btcpy, stableContainer);
+//
+//  return 0;
+////>>>>>>> origin/master
+////>>>>>>> Stashed changes
+//  // this next portion was something I used to sort a bunch of chars
+//  // this was what I used to debug my iterator and made it work
+// 	btree<char> astring;
+//
+//	cout << "\nInserting these random chars into the tree...\n";
+//	for(int i = 0; i < 10; i++) {
+//    pair<btree<char>::iterator, bool> result = astring.insert(static_cast<char>(getRandom('A', 'z')));
+//    cout << *result.first;
+//	}
+//	cout << endl << endl;
+//
+//
+//
+//  for(btree<char>::iterator iter = astring.begin(); iter != astring.end(); ++iter)
+//    cout << *iter;
+//	cout << endl;
+//
+//
+//  std::copy(astring.begin(), astring.end(), std::ostream_iterator<char>(std::cout, " "));
+//
+//
+//  // const iterator test
+//  const btree<char>& refstring = astring;
+//    btree<char>::const_iterator iter;
+//	cout << "Voila!  Sorted!" << endl;
+//
+//
+//	for(iter = refstring.begin(); iter != refstring.end(); ++iter) {
+//		astring.insert(static_cast<char>(getRandom('A', 'z')));
+//
+//		cout << *(iter) << " ";
+//	}
+//
+//	for(btree<char>::const_iterator iter = refstring.begin(); !(iter == refstring.end()); ++iter)
+//		cout << *iter;
+//	cout << endl;
+//
+//
+//  // a full-scale string test of the tree using iterators
+//  btree<string> *strTable = new btree<string>(40);
+//
+//  ifstream wordFile("twl.txt");
+//  if (!wordFile)
+//    return 1;  // file couldn't be opened for some reason, abort...
+//
+//  while (wordFile.good()) {
+//    string word;
+//    getline(wordFile, word);
+//    strTable->insert(word);
+//  }
+//  wordFile.close();
+//
+//  cout << "twl.txt sorted by our wonderful tree..." << endl;
+//  // Such beautiful code with iterators...
+//  for(btree<string>::const_iterator iter = strTable->begin(); iter != strTable->end(); ++iter)
+//    cout << *iter << endl;
+//
+//  // reverse iterator
+//  btree<string>::reverse_iterator riter = strTable->rbegin();
+//  btree<string>::const_iterator citer = strTable->begin();
+//
+//    std::cout << *citer << '\n';
+//  if (*citer != *riter) {
+//    cout << "success!" << endl;
+//  }
+//
+//
+//  // try to create a copy
+//  btree<string> btcpy2;
+//  btcpy2 = *strTable;
+//
+//  return 0;
 }
 

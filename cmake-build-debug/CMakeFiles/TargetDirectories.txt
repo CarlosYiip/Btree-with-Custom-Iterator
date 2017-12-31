@@ -1,0 +1,3 @@
+/Users/carlosye/Desktop/COMP6771/a4/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/Users/carlosye/Desktop/COMP6771/a4/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/carlosye/Desktop/COMP6771/a4/cmake-build-debug/CMakeFiles/a4.dir
